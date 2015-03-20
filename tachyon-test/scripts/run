@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
+
+TACHYON_JAR=$BASE_DIR/localRepo/org/tachyonproject/tachyon/0.7.0-SNAPSHOT-jar-with-dependencies/tachyon-0.7.0-SNAPSHOT-jar-with-dependencies.jar
+
+java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://localhost:19998 /SingleFileTest TRY_CACHE
+

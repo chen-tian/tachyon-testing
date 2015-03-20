@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
+
+cd $BASE_DIR
+mvn install:install-file -Dfile=$TACHYON_HOME/core/target/tachyon-0.7.0-SNAPSHOT-jar-with-dependencies.jar -DgroupId=org.tachyonproject -DartifactId=tachyon -Dversion=0.7.0-SNAPSHOT-jar-with-dependencies -Dpackaging=jar -DlocalRepositoryPath=$BASE_DIR/localRepo
+
+mvn package -DskipTests
+

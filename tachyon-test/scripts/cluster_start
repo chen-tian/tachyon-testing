@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Author: Chen Tian
+# Date: Mar 18, 2015
+
+target=(Carmel-3 Carmel-4 Carmel-5 Carmel-6)
+target_master=Carmel-3
+
+compile="mvn install -DskipTests"
+
+update="git pull"
+setworkers="cp -f config/pdct_workers ~/git/tachyon/conf/workers"
+setenv="cp -f config/pdct_tachyon_env ~/git/tachyon/conf/tachyon-env.sh"
+
+#cmd="$update; $compile; $setworkers; $setenv"
+cmd="$update; $setworkers; $setenv"
+
+for t in ${target[@]}; do
+echo "Sending command to $t.........."
+ssh -t $t "cd ~/git/tachyon-testing/tachyon-test; $cmd"
+done
+
+
+#start tachyon cluster
+stop_it="~/git/tacyhon/bin/tachyon-stop.sh"
+run_it="~/git/tachyon/bin/tachyon-start.sh all SudoMount"
+ssh -t $target_master "$stop_it; $run_it"
