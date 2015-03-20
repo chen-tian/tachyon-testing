@@ -8,14 +8,19 @@ target=(Carmel-3 Carmel-4 Carmel-5 Carmel-6)
 
 if [ $# -ne 1 ]
 then
- echo "Usage: cluster_cmd  <tachyon | tachyon-testing>"
+ echo "Usage: cluster_cmd  <home | tachyon | tachyon-testing>"
 exit
 fi
 
+if [ $1 ==  "home" ]
+then
+  dst="cd ~"
+  echo "Will execute command from directory ~"
+else
+  dst="cd ~/git/$1"
+  echo "Will execute command from directory ~/git/$1"
+fi
 
-dst="cd ~/git/$1"
-
-echo "Will execute command from directory ~/git/$1 "
 echo "Please input your comands, use Ctrl-D when you are done:"
 
 cmd=$(</dev/stdin)
