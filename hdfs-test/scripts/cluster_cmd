@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Author: Chen Tian
+# Date: Mar 18, 2015
+
+target=(Carmel-3 Carmel-4 Carmel-5 Carmel-6)
+
+
+# if [ $# -ne 1 ]
+# then
+#  echo "Usage: cluster_cmd  <tachyon | tachyon-testing>"
+# exit
+# fi
+
+
+# dst="cd ~/git/$1"
+
+# echo "Will execute command from directory ~/git/$1 "
+echo "Please input your comands, use Ctrl-D when you are done:"
+
+cmd=$(</dev/stdin)
+for t in ${target[@]}; do
+echo "Sending command to $t.........."
+ssh -t $t "$cmd"
+done
