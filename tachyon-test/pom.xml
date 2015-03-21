@@ -37,6 +37,7 @@
         <id>local.repo</id>
         <name>repo</name>
         <url>file:${project.basedir}/localRepo</url>
+        <releases><enabled>true</enabled><updatePolicy>always</updatePolicy></releases>
     </repository>
   </repositories>
 
