@@ -5,7 +5,7 @@ set -e
 BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
 HADOOP_DIR=/usr/local/hadoop
 CLASSES=(HdfsCacheReader HdfsReader HdfsWriter)
-FILESIZES=(1g)
+FILESIZES=(1g 10g 100g 200g)
 
 for c in ${CLASSES[@]}; do
 for f in ${FILESIZES[@]}; do
