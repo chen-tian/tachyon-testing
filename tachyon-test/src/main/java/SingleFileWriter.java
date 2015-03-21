@@ -58,7 +58,8 @@ public class SingleFileWriter {
 
   private void writeFile() throws IOException {
     System.out.println("Start writing " + mFilePath);
-    ByteBuffer buf = ByteBuffer.allocate(mNumbers * 4);
+    int totalBytes=0; 
+    ByteBuffer buf = ByteBuffer.allocate(64*1024);
     buf.order(ByteOrder.nativeOrder());
     for (int k = 0; k < mNumbers; k ++) {
       buf.putInt(k);
@@ -68,9 +69,13 @@ public class SingleFileWriter {
 
     TachyonFile file = mTachyonClient.getFile(mFilePath);
     OutStream os = file.getOutStream(mWriteType);
-    os.write(buf.array());
+    for (int i=0; i<1024*1024; i++) {
+      os.write(buf.array());
+      buf.flip();
+      totalBytes = totalBytes + buf.capacity();
+    }
     os.close();
-    System.out.println("Finish writing " + mFilePath);
+    System.out.println("Finish writing " + totalBytes/(1024*1024) + " MB data to file " + mFilePath);
   }
 
   private void deleteFile() throws IOException {
