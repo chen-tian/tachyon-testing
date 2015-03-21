@@ -22,6 +22,6 @@ done
 
 
 #start tachyon cluster
-stop_it="~/git/tacyhon/bin/tachyon-stop.sh"
+stop_it="~/git/tachyon/bin/tachyon-stop.sh"
 run_it="~/git/tachyon/bin/tachyon-start.sh all SudoMount"
 ssh -t $target_master "$stop_it; $run_it"
