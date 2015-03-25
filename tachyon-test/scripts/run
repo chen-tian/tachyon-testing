@@ -2,12 +2,29 @@
 
 set -e
 
+if [ $# -ne 3 ]
+then
+echo "Usage:$0 [tachyon host name] [writeType] [fileSize in G]"
+cat << EOF 
+	WriteType:
+ 	MUST_CACHE: Write the file and must cache it.
+  	TRY_CACHE: Write the file and try to cache it.
+  	CACHE_THROUGH: Write the file synchronously to the under fs, and also try to cache it,
+  	THROUGH: Write the file synchronously to the under fs, no cache.
+  	ASYNC_THROUGH: Write the file asynchronously to the under fs (either must cache or must through).
+EOF
+exit
+fi
+
 BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
 
 TACHYON_JAR=$BASE_DIR/localRepo/org/tachyonproject/tachyon/0.7.0-SNAPSHOT-jar-with-dependencies/tachyon-0.7.0-SNAPSHOT-jar-with-dependencies.jar
 
-echo "
-java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://carmel-3:19998 /SingleFileTest TRY_CACHE 1g
-"
-java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://carmel-3:19998 /SingleFileTest TRY_CACHE 1g
+host=$1
+writetype=$2
+size=$3
 
+echo "
+java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://$host:19998 /SingleFileTest $2 $3
+"
+java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://$host:19998 /SingleFileTest $2 $3

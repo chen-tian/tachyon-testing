@@ -99,26 +99,14 @@ public class SingleFileWriter {
       System.exit(-1);
     }
 
-    double fileSize;
-    if (args[3].equals("1g")) {
-       fileSize = 1024.0*1024*1024;
-    } else if (args[3].equals("10g")) {
-       fileSize = 10240.0*1024*1024;
-    } else if (args[3].equals("100g")) {
-       fileSize = 102400.0*1024*1024;
-    } else if (args[3].equals("200g")) {
-       fileSize = 204800.0*1024*1024;
-    } else {
-       throw new IllegalArgumentException("Invalid arg: " + args[0]);
-    }
-
+   double fileSize = Double.parseDouble((args[3].split("g|G"))[0])*1024*1024*1024;
    SingleFileWriter sfw;
    try {
     sfw = new SingleFileWriter(new TachyonURI(args[0]), new TachyonURI(args[1]), 
 	WriteType.valueOf(args[2]), fileSize);
     sfw.createFile();
     sfw.writeFile();
-    sfw.deleteFile();
+    //sfw.deleteFile();
    } catch (Exception e) {
      System.err.println("Exception: " + e.getMessage());
    }
