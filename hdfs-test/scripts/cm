@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
+SRC_FILES=(HdfsCacheReader.java HdfsReader.java HdfsWriter.java)
+
+cd $BASE_DIR/src
+for src in ${SRC_FILES[@]}; do
+javac $src
+done
+
+jar -cf hdfs_test.jar *.class
+cd $BASE_DIR
+mv src/hdfs_test.jar ./

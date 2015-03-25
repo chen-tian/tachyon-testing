@@ -80,7 +80,7 @@ public class SingleFileWriter {
     }
 
     os.close();
-    System.out.println("Finish writing " + mFilePath);
+    System.out.println("Finish writing " + totalBytes/(1024*1024) + " MB data to file " + mFilePath);
   }
 
   private void deleteFile() throws IOException {
