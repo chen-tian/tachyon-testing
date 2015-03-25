@@ -62,14 +62,14 @@ public class SingleFileWriter {
   // prepare input data
     ByteBuffer buf = ByteBuffer.allocate(mBufferSize);
     buf.order(ByteOrder.nativeOrder());
-    for (int k = 0; k < mBufferSize ; k ++) {
+    for (int k = 0; k < mBufferSize/Integer.SIZE ; k ++) {
       buf.putInt(k);
     }
 
     buf.flip();
 
   // we just open one file for the moment
-    Timer t = new Timer(1);
+    Timer t = new Timer();
     TachyonFile file = mTachyonClient.getFile(mFilePath);
     OutStream os = file.getOutStream(mWriteType);
 
@@ -93,7 +93,7 @@ public class SingleFileWriter {
   }
 
   public static void main(String[] args) throws IllegalArgumentException {
-    if (args.length != 3) {
+    if (args.length != 4) {
       System.out.println("java -cp pdct-test-1.0.jar  " 
          + "SingleFileWriter <TachyonMasterAddress> <FilePath> <WriteType> <FileSize>");
       System.exit(-1);
@@ -118,7 +118,7 @@ public class SingleFileWriter {
 	WriteType.valueOf(args[2]), fileSize);
     sfw.createFile();
     sfw.writeFile();
-    //sfw.deleteFile();
+    sfw.deleteFile();
    } catch (Exception e) {
      System.err.println("Exception: " + e.getMessage());
    }
