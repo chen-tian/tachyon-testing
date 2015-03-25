@@ -40,17 +40,18 @@ public class SingleFileWriter {
   private final TachyonURI mFilePath;
   private final WriteType mWriteType;
   private final TachyonFS mTachyonClient; 
-  private final int mNumbers = 20;
+  private final int mBufferSize= 64*1024;
+  private final double mFileSize;
 
-  public SingleFileWriter(TachyonURI masterLocation, TachyonURI filePath, WriteType writeType) 
+  public SingleFileWriter(TachyonURI masterLocation, TachyonURI filePath, WriteType writeType, double fsize) 
   throws Exception {
     mMasterLocation = masterLocation;
     mFilePath = filePath;
     mWriteType = writeType;
     mTachyonClient = TachyonFS.get(mMasterLocation, new TachyonConf());
+    mFileSize= fsize;
   }
 
-  
   private void createFile() throws IOException {
     int fileId = mTachyonClient.createFile(mFilePath);
     System.out.println("Creating file " + mFilePath + " id =" + fileId );
@@ -58,17 +59,26 @@ public class SingleFileWriter {
 
   private void writeFile() throws IOException {
     System.out.println("Start writing " + mFilePath);
-    ByteBuffer buf = ByteBuffer.allocate(mNumbers * 4);
+  // prepare input data
+    ByteBuffer buf = ByteBuffer.allocate(mBufferSize);
     buf.order(ByteOrder.nativeOrder());
-    for (int k = 0; k < mNumbers; k ++) {
+    for (int k = 0; k < mBufferSize ; k ++) {
       buf.putInt(k);
     }
 
     buf.flip();
 
+  // we just open one file for the moment
     TachyonFile file = mTachyonClient.getFile(mFilePath);
     OutStream os = file.getOutStream(mWriteType);
-    os.write(buf.array());
+
+    double numIters = mFileSize / (double)mBufferSize; 
+
+    for (int i=0; i<numIters; i++) {
+      os.write(buf.array());
+      buf.flip();
+    }
+
     os.close();
     System.out.println("Finish writing " + mFilePath);
   }
@@ -81,14 +91,27 @@ public class SingleFileWriter {
   public static void main(String[] args) throws IllegalArgumentException {
     if (args.length != 3) {
       System.out.println("java -cp pdct-test-1.0.jar  " 
-         + "SingleFileWriter <TachyonMasterAddress> <FilePath> <WriteType>");
+         + "SingleFileWriter <TachyonMasterAddress> <FilePath> <WriteType> <FileSize>");
       System.exit(-1);
+    }
+
+    double fileSize;
+    if (args[3].equals("1g")) {
+       fileSize = 1024.0*1024*1024;
+    } else if (args[3].equals("10g")) {
+       fileSize = 10240.0*1024*1024;
+    } else if (args[3].equals("100g")) {
+       fileSize = 102400.0*1024*1024;
+    } else if (args[3].equals("200g")) {
+       fileSize = 204800.0*1024*1024;
+    } else {
+       throw new IllegalArgumentException("Invalid arg: " + args[0]);
     }
 
    SingleFileWriter sfw;
    try {
     sfw = new SingleFileWriter(new TachyonURI(args[0]), new TachyonURI(args[1]), 
-	WriteType.valueOf(args[2]));
+	WriteType.valueOf(args[2]), fileSize);
     sfw.createFile();
     sfw.writeFile();
     //sfw.deleteFile();
