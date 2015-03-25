@@ -69,18 +69,22 @@ public class SingleFileWriter {
     buf.flip();
 
   // we just open one file for the moment
+    Timer t = new Timer(1);
     TachyonFile file = mTachyonClient.getFile(mFilePath);
     OutStream os = file.getOutStream(mWriteType);
 
     double numIters = mFileSize / (double)mBufferSize; 
 
+    t.start(0);
     for (int i=0; i<numIters; i++) {
       os.write(buf.array());
       buf.flip();
     }
+    t.end(0);
 
     os.close();
-    System.out.println("Finish writing " + totalBytes/(1024*1024) + " MB data to file " + mFilePath);
+    System.out.println("Finish writing " + mFileSize/(1024*1024) + " MB data to file " + mFilePath);
+    t.dump();
   }
 
   private void deleteFile() throws IOException {
