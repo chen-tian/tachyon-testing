@@ -2,9 +2,9 @@
 
 set -e
 
-if [ $# -ne 3 ]
+if [ $# -ne 4 ]
 then
-echo "Usage:$0 [tachyon host name] [writeType] [fileSize in G]"
+echo "Usage:$0 [tachyon host] [fileName] [writeType] [fileSize in G]"
 cat << EOF 
 	WriteType:
  	MUST_CACHE: Write the file and must cache it.
@@ -21,10 +21,11 @@ BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..
 TACHYON_JAR=$BASE_DIR/localRepo/org/tachyonproject/tachyon/0.7.0-SNAPSHOT-jar-with-dependencies/tachyon-0.7.0-SNAPSHOT-jar-with-dependencies.jar
 
 host=$1
-writetype=$2
-size=$3
+fname=$2
+writetype=$3
+size=$4
 
 echo "
-java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://$host:19998 /SingleFileTest $2 $3
+java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileTester tachyon://$host:19998 /$2 $3 $4
 "
-java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileWriter tachyon://$host:19998 /SingleFileTest $2 $3
+java -cp $TACHYON_JAR:$BASE_DIR/target/pdct-testing-1.0.jar SingleFileTester tachyon://$host:19998 /$2 $3 $4

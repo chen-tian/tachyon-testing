@@ -33,7 +33,7 @@ import tachyon.client.TachyonFS;
 import tachyon.client.WriteType;
 import tachyon.conf.TachyonConf;
 
-public class SingleFileWriter {
+public class SingleFileTester {
   //private static final Logger LOG = LoggerFactory.getLogger(Constants.LOGGER_TYPE);
 
   private final TachyonURI mMasterLocation;
@@ -43,7 +43,7 @@ public class SingleFileWriter {
   private final int mBufferSize= 64*1024;
   private final double mFileSize;
 
-  public SingleFileWriter(TachyonURI masterLocation, TachyonURI filePath, WriteType writeType, double fsize) 
+  public SingleFileTester(TachyonURI masterLocation, TachyonURI filePath, WriteType writeType, double fsize) 
   throws Exception {
     mMasterLocation = masterLocation;
     mFilePath = filePath;
@@ -53,6 +53,10 @@ public class SingleFileWriter {
   }
 
   private void createFile() throws IOException {
+    if (mTachyonClient.exist(mFilePath)) {
+       mTachyonClient.delete(mFilePath, false);
+       System.out.println("Delete exisitn file " + mFilePath);
+    }
     int fileId = mTachyonClient.createFile(mFilePath);
     System.out.println("Creating file " + mFilePath + " id =" + fileId );
   }
@@ -95,14 +99,14 @@ public class SingleFileWriter {
   public static void main(String[] args) throws IllegalArgumentException {
     if (args.length != 4) {
       System.out.println("java -cp pdct-test-1.0.jar  " 
-         + "SingleFileWriter <TachyonMasterAddress> <FilePath> <WriteType> <FileSize>");
+         + "SingleFileTester <TachyonMasterAddress> <FilePath> <WriteType> <FileSize>");
       System.exit(-1);
     }
 
    double fileSize = Double.parseDouble((args[3].split("g|G"))[0])*1024*1024*1024;
-   SingleFileWriter sfw;
+   SingleFileTester sfw;
    try {
-    sfw = new SingleFileWriter(new TachyonURI(args[0]), new TachyonURI(args[1]), 
+    sfw = new SingleFileTester(new TachyonURI(args[0]), new TachyonURI(args[1]), 
 	WriteType.valueOf(args[2]), fileSize);
     sfw.createFile();
     sfw.writeFile();
