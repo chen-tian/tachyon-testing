@@ -17,6 +17,8 @@
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.io.BufferedInputStream;
@@ -39,7 +41,7 @@ public class SingleFileReader extends Configured implements Tool {
     int bufferSize = 65536;
     Timer t;
 
-    private void writeFile (String fSize) throws Exception {
+    private void writeFile (String cached, String fSize) throws Exception {
 	fileSize = Double.parseDouble((fSize.split("g|G"))[0])
 	    *1024*1024*1024;
 	String hdfsFolder = "/hdfs_test/";
@@ -73,6 +75,23 @@ public class SingleFileReader extends Configured implements Tool {
 	}
 	t.end(0);
 	os.close();
+
+	/* Check to see if the file needs to be cached */
+	t.start(1);
+	if (cached.equals("cache")) {
+	    String cmdStr = "/usr/local/hadoop/bin/hdfs cacheadmin -addDirective -path " + hdfsFile + " -pool hdfs_test";
+	    // System.out.println(cmdStr);
+	    Process p = Runtime.getRuntime().exec(cmdStr);
+	    p.waitFor();
+	    String cmdOutLine="";
+	    StringBuffer cmdOutBuf = new StringBuffer();
+	    BufferedReader cmdOutReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	    while((cmdOutLine = cmdOutReader.readLine()) != null){
+		cmdOutBuf.append(cmdOutLine+"\n");
+	    }
+	    // System.out.println(cmdOutBuf.toString());
+	}
+	t.end(1);
     }
 
     private void seqRead () throws Exception {
@@ -80,14 +99,14 @@ public class SingleFileReader extends Configured implements Tool {
 	FSDataInputStream is = fs.open(hdfsFilePath);
 	// byte[] bbuf = new byte[bufferSize];
 	ByteBuffer buf = ByteBuffer.allocate(bufferSize);
-	t.start(1);
+	t.start(2);
 	int bytesRead = is.read(buf);
 	buf.flip();
 	while(bytesRead != -1) {
 	    bytesRead = is.read(buf);
 	    buf.flip();
 	}
-	t.end(1);
+	t.end(2);
 	is.close();
     };
 
@@ -99,7 +118,7 @@ public class SingleFileReader extends Configured implements Tool {
 	double offsetMax = fileSize - bufferSize - 1;
 	long offset = (long)(Math.random()*offsetMax);
 	long numIters = (long)(fileSize / bufferSize);
-	t.start(1);
+	t.start(2);
 	while (numIters != 0) {
 	    /*
 	    if (numIters % 500 == 0) {
@@ -112,30 +131,51 @@ public class SingleFileReader extends Configured implements Tool {
 	    offset = (long)(Math.random()*offsetMax);
 	    numIters = numIters - 1;
 	}
-	t.end(1);
+	t.end(2);
 	is.close();
     }
 
+    private void deleteFile (String cached, String fSize) throws Exception{
+	fs.delete(hdfsFilePath, true);
+
+	if (cached.equals("cache")) {
+	    String hdfsFolder = "/hdfs_test/";
+	    String hdfsFile = hdfsFolder + fSize;
+	    String cmdStr = "/usr/local/hadoop/bin/hdfs cacheadmin -removeDirectives -path " + hdfsFile;
+	    // System.out.println(cmdStr);
+	    Process p = Runtime.getRuntime().exec(cmdStr);
+	    p.waitFor();
+	    String cmdOutLine="";
+	    StringBuffer cmdOutBuf = new StringBuffer();
+	    BufferedReader cmdOutReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	    while((cmdOutLine = cmdOutReader.readLine()) != null){
+		cmdOutBuf.append(cmdOutLine+"\n");
+	    }
+	    // System.out.println(cmdOutBuf.toString());
+	}
+    }
+
     public int run (String[] args) throws Exception {	
-	if (args.length < 2) {
-	    System.err.println ("SingleFileReader [fileSize ie. 1g/10g/100g] [ReadType ie. seq/rand]");
+	if (args.length < 3) {
+	    System.err.println ("SingleFileReader [cache/nocache] [fileSize ie. 1g/10g/100g] [ReadType ie. seq/rand]");
 	    return 1;
 	}
 
 	/* Create file on HDFS */
-	writeFile(args[0]);
+	writeFile(args[0], args[1]);
 	
 	/* Read the same file from HDFS */
-	if (args[1].equals("seq")) {
+	if (args[2].equals("seq")) {
 	    seqRead();
-	} else if (args[1].equals("rand")) {
+	} else if (args[2].equals("rand")) {
 	    randRead();
 	} else {
 	    System.err.println("Unknown read type. No read is performed");
 	}
 
 	/* Clean up */
-	fs.delete(hdfsFilePath, true);
+	deleteFile(args[0], args[1]);
+	
 	t.dump();
 	
 	return 0;
