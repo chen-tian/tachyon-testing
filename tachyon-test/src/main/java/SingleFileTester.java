@@ -31,6 +31,8 @@ import tachyon.client.TachyonByteBuffer;
 import tachyon.client.TachyonFile;
 import tachyon.client.TachyonFS;
 import tachyon.client.WriteType;
+import tachyon.client.FileInStream;
+import tachyon.client.ReadType;
 import tachyon.conf.TachyonConf;
 
 public class SingleFileTester {
@@ -85,11 +87,32 @@ public class SingleFileTester {
       buf.flip();
     }
     t.end(0);
-
+    t.dump();
     os.close();
     System.out.println("Finish writing " + mFileSize/(1024*1024) + " MB data to file " + mFilePath);
-    t.dump();
   }
+
+    private void readFile() throws IOException {
+	System.out.println("Start Reading " + mFilePath);
+  
+  // we just open one file for the moment
+    Timer t = new Timer();
+    TachyonFile file = mTachyonClient.getFile(mFilePath);
+    int numIters = (int)mFileSize / mBufferSize;
+    FileInStream is = (FileInStream) file.getInStream(ReadType.CACHE);
+    byte[] buf = new byte [mBufferSize];
+    t.start(0);
+    
+    int ret = is.read(buf);
+    while (ret != -1) {
+	ret = is.read(buf);
+    }
+    
+    t.end(0);
+    t.dump();
+    is.close();
+    //System.out.println("Finish reading " + mFileSize/(1024*1024) + " MB data to file " + mFilePath);
+    }
 
   private void deleteFile() throws IOException {
     mTachyonClient.delete(mFilePath, false);
@@ -110,6 +133,7 @@ public class SingleFileTester {
 	WriteType.valueOf(args[2]), fileSize);
     sfw.createFile();
     sfw.writeFile();
+    sfw.readFile();
     //sfw.deleteFile();
    } catch (Exception e) {
      System.err.println("Exception: " + e.getMessage());

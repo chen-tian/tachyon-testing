@@ -21,7 +21,7 @@ int main (int argc, char *argv[]) {
   memset(mem, 0, sizeof(char)*bytes);
 
   if (!strcmp(argv[3],"w")) {
-      for (i=0; i<5; i++) {
+      for (i=0; i<7; i++) {
 	  gettimeofday(&start, NULL);
 	  for (j=0; j<numIters; j++)
 	      memcpy(&mem[j*bufSize], buf, bufSize);
@@ -32,7 +32,7 @@ int main (int argc, char *argv[]) {
 	  printf("%f\n",duration);
       }
   } else if (!strcmp(argv[3],"r")){
-      for (i=0; i<5; i++) {
+      for (i=0; i<7; i++) {
 	  gettimeofday(&start, NULL);
 	  for (j=0; j<numIters; j++)
 	      memcpy(buf, &mem[j*bufSize], bufSize);
