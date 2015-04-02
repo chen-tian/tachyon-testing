@@ -31,7 +31,7 @@ import tachyon.client.TachyonByteBuffer;
 import tachyon.client.TachyonFile;
 import tachyon.client.TachyonFS;
 import tachyon.client.WriteType;
-import tachyon.client.FileInStream;
+import tachyon.client.InStream;
 import tachyon.client.ReadType;
 import tachyon.conf.TachyonConf;
 
@@ -99,7 +99,7 @@ public class SingleFileTester {
     Timer t = new Timer();
     TachyonFile file = mTachyonClient.getFile(mFilePath);
     int numIters = (int)mFileSize / mBufferSize;
-    FileInStream is = (FileInStream) file.getInStream(ReadType.CACHE);
+    InStream is = file.getInStream(ReadType.CACHE);
     byte[] buf = new byte [mBufferSize];
     t.start(0);
     
